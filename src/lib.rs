@@ -17,17 +17,134 @@
 //! Definitions for environment types for contracts targeted at a
 //! substrate chain with the default `node-runtime` configuration.
 
-#![cfg_attr(not(any(test, feature = "test-env")), no_std)]
+#![cfg_attr(not(test), no_std)]
 
-use srml_contract;
-use node_runtime;
+use core::{
+    array::TryFromSliceError,
+    convert::TryFrom,
+};
+
+use parity_codec::{Encode, Decode};
 
 /// Contract environment types defined in substrate node-runtime
 pub enum NodeRuntimeTypes {}
 
+/// The default SRML address type.
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Encode, Decode)]
+pub struct AccountId([u8; 32]);
+
+impl From<[u8; 32]> for AccountId {
+    fn from(address: [u8; 32]) -> AccountId {
+        AccountId(address)
+    }
+}
+
+impl<'a> TryFrom<&'a [u8]> for AccountId {
+    type Error = TryFromSliceError;
+
+    fn try_from(bytes: &'a [u8]) -> Result<AccountId, TryFromSliceError> {
+        let address = <[u8; 32]>::try_from(bytes)?;
+        Ok(AccountId(address))
+    }
+}
+
+/// The default SRML balance type.
+pub type Balance = u128;
+
+/// The default SRML hash type.
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Encode, Decode)]
+pub struct Hash([u8; 32]);
+
+impl From<[u8; 32]> for Hash {
+    fn from(hash: [u8; 32]) -> Hash {
+        Hash(hash)
+    }
+}
+
+impl<'a> TryFrom<&'a [u8]> for Hash {
+    type Error = TryFromSliceError;
+
+    fn try_from(bytes: &'a [u8]) -> Result<Hash, TryFromSliceError> {
+        let hash = <[u8; 32]>::try_from(bytes)?;
+        Ok(Hash(hash))
+    }
+}
+
+/// The default SRML moment type.
+pub type Moment = u64;
+
 impl ink_core::env::EnvTypes for NodeRuntimeTypes {
-    type AccountId = srml_contract::AccountIdOf<node_runtime::Runtime>;
-    type Balance = srml_contract::BalanceOf<node_runtime::Runtime>;
-    type Hash = srml_contract::SeedOf<node_runtime::Runtime>;
-    type Moment = srml_contract::MomentOf<node_runtime::Runtime>;
+    type AccountId = AccountId;
+    type Balance = Balance;
+    type Hash = Hash;
+    type Moment = Moment;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fmt::Debug;
+    use node_runtime::Runtime;
+    use parity_codec::{Encode, Decode, Codec};
+    use quickcheck_macros::quickcheck;
+
+    macro_rules! impl_hash_quickcheck_arb_wrapper {
+        ($inner:ident, $wrapper:ident) => {
+            #[derive(Debug, Clone)]
+            struct $wrapper($inner);
+
+            impl quickcheck::Arbitrary for $wrapper {
+                fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Self {
+                    let mut res = [0u8; core::mem::size_of::<Self>()];
+                    g.fill_bytes(&mut res[..]);
+                    $wrapper($inner(res)) 
+                }
+            }
+
+            impl From<$wrapper> for $inner {
+                fn from(x: $wrapper) -> Self {
+                    x.0
+                }
+            }
+        }
+    }
+
+    impl_hash_quickcheck_arb_wrapper!(AccountId, ContractAccountId);
+    impl_hash_quickcheck_arb_wrapper!(Hash, ContractHash);
+
+    /// Ensure that a type is compatible with its equivalent runtime type
+    fn runtime_codec_roundtrip<ContractT, WrapperT, RuntimeT>(value: WrapperT) 
+    where
+        ContractT: Codec + Debug + Eq + From<WrapperT>,
+        RuntimeT: Codec,
+    {
+        let contract_value: ContractT = value.into();
+        let contract_encoded = Encode::encode(&contract_value);
+        let runtime_decoded: RuntimeT = Decode::decode(&mut contract_encoded.as_slice())
+            .expect("Should be decodable into node_runtime type");
+        let runtime_encoded = Encode::encode(&runtime_decoded);
+        let contract_decoded: ContractT = Decode::decode(&mut runtime_encoded.as_slice())
+            .expect("Should be decodable into contract env type");
+        assert_eq!(contract_value, contract_decoded)
+    }
+
+    #[quickcheck]
+    fn account_id(value: ContractAccountId) {
+        runtime_codec_roundtrip::<AccountId, ContractAccountId, srml_contract::AccountIdOf<Runtime>>(value);
+    }
+
+    #[quickcheck]
+    fn balance(value: Balance) {
+        runtime_codec_roundtrip::<Balance, Balance, srml_contract::BalanceOf<Runtime>>(value);
+    }
+
+    #[quickcheck]
+    fn hash(value: ContractHash) {
+        runtime_codec_roundtrip::<Hash, ContractHash, srml_contract::SeedOf<Runtime>>(value);
+    }
+
+    #[quickcheck]
+    pub fn moment(value: Moment) {
+        runtime_codec_roundtrip::<Moment, Moment, srml_contract::MomentOf<Runtime>>(value);
+    }
 }
