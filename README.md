@@ -1,7 +1,5 @@
 # Node runtime types for `ink!`
 
-**NOTE:** This currently depends on a custom branch of `substrate`, with some extra trait implementations for some of the types. This will be updated when we merge those changes.
-
 Defines types for [ink!](https://github.com/paritytech/ink) smart contracts targeting [Substrate's `node-runtime`](https://github.com/paritytech/substrate/blob/master/node/runtime/src/lib.rs).
 
 Supplies an implementation of the ink `EnvTypes` trait:
@@ -19,5 +17,5 @@ pub trait EnvTypes {
 }
 ```
 
-See `ink!` [examples](https://github.com/paritytech/ink/tree/master/examples/lang) for usage.
+See `ink!` [example](https://github.com/paritytech/ink/tree/master/examples/lang/erc20) for usage.
 
