@@ -18,23 +18,18 @@ categories = ["no-std", "embedded"]
 include = ["/Cargo.toml", "src/**/*.rs", "/README.md", "/LICENSE"]
 
 [dependencies]
-# ink_core = { git = "https://github.com/paritytech/ink/", branch = "aj-runtime-types", package = "ink_core" }
-ink_core = { path = "/home/andrew/code/paritytech/ink/core" }
+# FIXME: remove aj-runtime-types branch once https://github.com/paritytech/ink/pull/108 merged
+ink_core = { git = "https://github.com/paritytech/ink/", branch = "aj-runtime-types", package = "ink_core" }
 parity-codec = { version = "3.2", default-features = false, features = ["derive"] }
 
 [dev-dependencies]
-node-runtime = { git = "https://github.com/paritytech/substrate/", branch = "aj-ink-types", package = "node-runtime", default-features = false }
-srml-contract = { git = "https://github.com/paritytech/substrate/", branch = "aj-ink-types", package = "srml-contract", default-features = false }
+node-runtime = { git = "https://github.com/paritytech/substrate/", branch = "aj-ink-types", package = "node-runtime", features = ["std"] }
+srml-contract = { git = "https://github.com/paritytech/substrate/", branch = "aj-ink-types", package = "srml-contract", features = ["core"] }
 quickcheck = "0.8"
 quickcheck_macros = "0.8"
 
 [features]
-default = [
-    "srml-contract/core",
-]
-test-env = ["std"]
+default = []
 std = [
     "ink_core/std",
-    "node-runtime/std",
-    "srml-contract/std",
 ]

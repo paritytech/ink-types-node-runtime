@@ -17,7 +17,7 @@
 //! Definitions for environment types for contracts targeted at a
 //! substrate chain with the default `node-runtime` configuration.
 
-#![cfg_attr(not(any(test, feature = "test-env")), no_std)]
+#![cfg_attr(not(test), no_std)]
 
 use core::{
     array::TryFromSliceError,
