@@ -20,10 +20,14 @@
 #![cfg_attr(not(test), no_std)]
 
 use core::{array::TryFromSliceError, convert::TryFrom};
-
 use parity_codec::{Decode, Encode};
 
+mod calls;
+
+pub use calls::*;
+
 /// Contract environment types defined in substrate node-runtime
+#[cfg_attr(feature = "std", derive(Debug, Clone, PartialEq, Eq))]
 pub enum NodeRuntimeTypes {}
 
 /// The default SRML address type.
@@ -73,6 +77,20 @@ pub type Moment = u64;
 /// The default SRML blocknumber type.
 pub type BlockNumber = u64;
 
+/// The default SRML call type.
+#[derive(Encode)]
+#[cfg_attr(feature = "test-env", derive(Decode, Debug, Clone, PartialEq, Eq))]
+pub enum Call {
+	#[codec(index = "5")]
+	Balances(calls::Balances<NodeRuntimeTypes>),
+}
+
+impl From<calls::Balances<NodeRuntimeTypes>> for Call {
+	fn from(balances_call: calls::Balances<NodeRuntimeTypes>) -> Call {
+		Call::Balances(balances_call)
+	}
+}
+
 impl ink_core::env::EnvTypes for NodeRuntimeTypes {
     type AccountId = AccountId;
     type AccountIndex = u32; // todo: move to Call
@@ -80,7 +98,7 @@ impl ink_core::env::EnvTypes for NodeRuntimeTypes {
     type Hash = Hash;
     type Moment = Moment;
     type BlockNumber = BlockNumber;
-    type Call = (); // todo: [AJ]
+    type Call = Call;
 }
 
 #[cfg(test)]
