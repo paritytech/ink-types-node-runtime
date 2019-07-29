@@ -29,12 +29,17 @@ pub enum Address<T: EnvTypes, AccountIndex> {
     Index(AccountIndex),
 }
 
+/// Returns `b` if `b` is greater than `a` and otherwise `None`.
 fn need_more_than<T: PartialOrd>(a: T, b: T) -> Option<T> {
     if a < b { Some(b) } else { None }
 }
 
-/// Decode impl copied from
-/// https://github.com/paritytech/substrate/blob/ec62d24c602912f07bbc416711376d9b8e5782c5/srml/indices/src/address.rs#L61
+/// Decode implementation copied over from Substrate `Address` that can be found [here](substrate-address).
+///
+/// # Note
+/// This implementation MUST be kept in sync with substrate, tests below will ensure that.
+///
+/// [substrate-address]: https://github.com/paritytech/substrate/blob/ec62d24c602912f07bbc416711376d9b8e5782c5/srml/indices/src/address.rs#L61
 impl<T, AccountIndex> Decode for Address<T, AccountIndex> where
     T: EnvTypes,
     AccountIndex: Decode + From<u32> + PartialOrd + Copy + Clone,
@@ -57,8 +62,12 @@ impl<T, AccountIndex> Decode for Address<T, AccountIndex> where
     }
 }
 
-/// Encode impl copied from
-/// https://github.com/paritytech/substrate/blob/ec62d24c602912f07bbc416711376d9b8e5782c5/srml/indices/src/address.rs#L83
+/// Encode implementation copied over from Substrate `Address` that can be found [here](substrate-address).
+///
+/// # Note
+/// This implementation MUST be kept in sync with substrate, tests below will ensure that.
+///
+/// [substrate-address]: https://github.com/paritytech/substrate/blob/ec62d24c602912f07bbc416711376d9b8e5782c5/srml/indices/src/address.rs#L83
 impl<T, AccountIndex> Encode for Address<T, AccountIndex> where
     T: EnvTypes,
     AccountIndex: Encode + TryInto<u32> + Copy + Clone,
