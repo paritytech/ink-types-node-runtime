@@ -22,10 +22,10 @@ ink_core = { git = "https://github.com/paritytech/ink/", branch = "aj-dispatch-c
 parity-codec = { version = "4.1", default-features = false, features = ["derive"] }
 
 [dev-dependencies]
-node-runtime = { git = "https://github.com/paritytech/substrate/", package = "node-runtime", default-features = false }
-srml-system = { git = "https://github.com/paritytech/substrate/", package = "srml-system", default-features = false }
-srml-timestamp = { git = "https://github.com/paritytech/substrate/", package = "srml-timestamp", default-features = false }
-srml-contract = { git = "https://github.com/paritytech/substrate/", package = "srml-contracts", default-features = false }
+node-runtime = { git = "https://github.com/paritytech/substrate/", package = "node-runtime", features = ["std"] }
+srml-system = { git = "https://github.com/paritytech/substrate/", package = "srml-system", features = ["std"] }
+srml-timestamp = { git = "https://github.com/paritytech/substrate/", package = "srml-timestamp", features = ["std"] }
+srml-contract = { git = "https://github.com/paritytech/substrate/", package = "srml-contracts", features = ["core"] }
 srml-indices = { git = "https://github.com/paritytech/substrate/", package = "srml-indices", features = ["std"] }
 quickcheck = "0.8"
 quickcheck_macros = "0.8"
@@ -34,9 +34,4 @@ quickcheck_macros = "0.8"
 default = ["std"]
 std = [
     "ink_core/std",
-    "node-runtime/std",
-    "srml-indices/std",
-    "srml-system/std",
-    "srml-timestamp/std",
-    "srml-contract/core",
 ]
