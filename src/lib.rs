@@ -77,23 +77,25 @@ pub type Moment = u64;
 /// The default SRML blocknumber type.
 pub type BlockNumber = u64;
 
+/// The default SRML AccountIndex type.
+type AccountIndex = u32;
+
 /// The default SRML call type.
 #[derive(Encode)]
-#[cfg_attr(feature = "test-env", derive(Decode, Debug, Clone, PartialEq, Eq))]
+#[cfg_attr(feature = "std", derive(Decode, Debug, Clone, PartialEq, Eq))]
 pub enum Call {
 	#[codec(index = "5")]
-	Balances(calls::Balances<NodeRuntimeTypes>),
+	Balances(calls::Balances<NodeRuntimeTypes, AccountIndex>),
 }
 
-impl From<calls::Balances<NodeRuntimeTypes>> for Call {
-	fn from(balances_call: calls::Balances<NodeRuntimeTypes>) -> Call {
+impl From<calls::Balances<NodeRuntimeTypes, AccountIndex>> for Call {
+	fn from(balances_call: calls::Balances<NodeRuntimeTypes, AccountIndex>) -> Call {
 		Call::Balances(balances_call)
 	}
 }
 
 impl ink_core::env::EnvTypes for NodeRuntimeTypes {
     type AccountId = AccountId;
-    type AccountIndex = u32; // todo: move to Call
     type Balance = Balance;
     type Hash = Hash;
     type Moment = Moment;

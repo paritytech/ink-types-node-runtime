@@ -24,9 +24,9 @@ use parity_codec::{
 use core::convert::TryInto;
 
 #[cfg_attr(feature = "std", derive(Debug, Clone, PartialEq, Eq))]
-pub enum Address<T: EnvTypes> {
+pub enum Address<T: EnvTypes, AccountIndex> {
     Id(T::AccountId),
-    Index(T::AccountIndex),
+    Index(AccountIndex),
 }
 
 fn need_more_than<T: PartialOrd>(a: T, b: T) -> Option<T> {
@@ -35,16 +35,17 @@ fn need_more_than<T: PartialOrd>(a: T, b: T) -> Option<T> {
 
 /// Decode impl copied from
 /// https://github.com/paritytech/substrate/blob/ec62d24c602912f07bbc416711376d9b8e5782c5/srml/indices/src/address.rs#L61
-impl<T> Decode for Address<T> where
+impl<T, AccountIndex> Decode for Address<T, AccountIndex> where
     T: EnvTypes,
+    AccountIndex: Decode + From<u32> + PartialOrd + Copy + Clone,
 {
     fn decode<I: Input>(input: &mut I) -> Option<Self> {
         Some(match input.read_byte()? {
-            x @ 0x00..=0xef => Address::Index(T::AccountIndex::from(x as u32)),
-            0xfc => Address::Index(T::AccountIndex::from(
+            x @ 0x00..=0xef => Address::Index(AccountIndex::from(x as u32)),
+            0xfc => Address::Index(AccountIndex::from(
                 need_more_than(0xef, u16::decode(input)?)? as u32
             )),
-            0xfd => Address::Index(T::AccountIndex::from(
+            0xfd => Address::Index(AccountIndex::from(
                 need_more_than(0xffff, u32::decode(input)?)?
             )),
             0xfe => Address::Index(
@@ -58,8 +59,9 @@ impl<T> Decode for Address<T> where
 
 /// Encode impl copied from
 /// https://github.com/paritytech/substrate/blob/ec62d24c602912f07bbc416711376d9b8e5782c5/srml/indices/src/address.rs#L83
-impl<T> Encode for Address<T> where
+impl<T, AccountIndex> Encode for Address<T, AccountIndex> where
     T: EnvTypes,
+    AccountIndex: Encode + TryInto<u32> + Copy + Clone,
 {
     fn encode_to<O: Output>(&self, dest: &mut O) {
         match *self {
@@ -92,13 +94,13 @@ impl<T> Encode for Address<T> where
 }
 
 #[derive(Encode)]
-#[cfg_attr(feature = "test-env", derive(Decode, Debug, Clone, PartialEq, Eq))]
-pub enum Balances<T: EnvTypes> {
+#[cfg_attr(feature = "std", derive(Decode, Debug, Clone, PartialEq, Eq))]
+pub enum Balances<T: EnvTypes, AccountIndex> {
     #[allow(non_camel_case_types)]
-    transfer(Address<T>, #[codec(compact)] T::Balance),
+    transfer(Address<T, AccountIndex>, #[codec(compact)] T::Balance),
     #[allow(non_camel_case_types)]
     set_balance(
-        Address<T>,
+        Address<T, AccountIndex>,
         #[codec(compact)] T::Balance,
         #[codec(compact)] T::Balance,
     ),
@@ -127,7 +129,7 @@ mod tests {
         let srml_decoded: address::Address<[u8; 32], u32> = Decode::decode(&mut ink_encoded.as_slice())
             .expect("Account Index decodes to srml Address");
         let srml_encoded = srml_decoded.encode();
-        let ink_decoded: Address<NodeRuntimeTypes> = Decode::decode(&mut srml_encoded.as_slice())
+        let ink_decoded: Address<NodeRuntimeTypes, u32> = Decode::decode(&mut srml_encoded.as_slice())
             .expect("Account Index decodes back to ink type");
 
         assert_eq!(ink_address, ink_decoded);
@@ -148,7 +150,7 @@ mod tests {
         let srml_decoded: address::Address<[u8; 32], u32> = Decode::decode(&mut ink_encoded.as_slice())
             .expect("Account Id decodes to srml Address");
         let srml_encoded = srml_decoded.encode();
-        let ink_decoded: Address<NodeRuntimeTypes> = Decode::decode(&mut srml_encoded.as_slice())
+        let ink_decoded: Address<NodeRuntimeTypes, u32> = Decode::decode(&mut srml_encoded.as_slice())
             .expect("Account Id decodes decodes back to ink type");
 
         assert_eq!(ink_address, ink_decoded);
