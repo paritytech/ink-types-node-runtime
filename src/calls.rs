@@ -109,8 +109,9 @@ pub enum Balances<T: EnvTypes, AccountIndex> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::NodeRuntimeTypes;
+    use crate::{calls, Call, NodeRuntimeTypes, AccountIndex};
 
+    use node_runtime::{self, Runtime};
     use parity_codec::{Decode, Encode};
     use srml_indices::address;
 
@@ -154,6 +155,32 @@ mod tests {
             .expect("Account Id decodes decodes back to ink type");
 
         assert_eq!(ink_address, ink_decoded);
+    }
+
+    #[test]
+    fn call_balance_transfer() {
+        let balance = 10_000;
+        let account_index = 0;
+
+        let contract_address = calls::Address::Index(account_index);
+        let contract_transfer = calls::Balances::<NodeRuntimeTypes, AccountIndex>::transfer(contract_address, balance);
+        let contract_call = Call::Balances(contract_transfer);
+
+        let srml_address = address::Address::Index(account_index);
+        let srml_transfer = node_runtime::BalancesCall::<Runtime>::transfer(srml_address, balance);
+        let srml_call = node_runtime::Call::Balances(srml_transfer);
+
+        let contract_call_encoded = contract_call.encode();
+        let srml_call_encoded = srml_call.encode();
+
+        assert_eq!(srml_call_encoded, contract_call_encoded);
+
+        let srml_call_decoded: node_runtime::Call = Decode::decode(&mut contract_call_encoded.as_slice())
+            .expect("Balances transfer call decodes to srml type");
+        let srml_call_encoded = srml_call_decoded.encode();
+        let contract_call_decoded: Call = Decode::decode(&mut srml_call_encoded.as_slice())
+            .expect("Balances transfer call decodes back to contract type");
+        assert_eq!(contract_call, contract_call_decoded);
     }
 }
 
