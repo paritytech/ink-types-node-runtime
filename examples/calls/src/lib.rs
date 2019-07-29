@@ -16,14 +16,11 @@
 
 #![cfg_attr(not(any(test, feature = "test-env")), no_std)]
 
-use ink_core::{
-    env::DefaultSrmlTypes,
-};
 use ink_lang::contract;
-use ink_types_node_runtime::calls;
+use ink_types_node_runtime::{calls, AccountIndex, NodeRuntimeTypes};
 
 contract! {
-    #![env = ink_types_node_runtime::NodeRuntimeTypes]
+    #![env = NodeRuntimeTypes]
 
     /// This simple dummy contract dispatches substrate runtime calls
     struct Calls {}
@@ -37,7 +34,7 @@ contract! {
         /// Dispatches a `transfer` call to the Balances srml module
         pub(external) fn balance_transfer(&mut self, dest: AccountId, value: Balance) {
             let dest_addr = calls::Address::Id(dest);
-            let transfer_call = calls::Balances::<NodeRuntimeTypes>::transfer(dest_addr, value);
+            let transfer_call = calls::Balances::<NodeRuntimeTypes, u32>::transfer(dest_addr, value);
             env.dispatch_call(transfer_call.into());
         }
     }

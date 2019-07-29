@@ -22,9 +22,7 @@
 use core::{array::TryFromSliceError, convert::TryFrom};
 use parity_codec::{Decode, Encode};
 
-mod calls;
-
-pub use calls::*;
+pub mod calls;
 
 /// Contract environment types defined in substrate node-runtime
 #[cfg_attr(feature = "std", derive(Debug, Clone, PartialEq, Eq))]
@@ -78,7 +76,7 @@ pub type Moment = u64;
 pub type BlockNumber = u64;
 
 /// The default SRML AccountIndex type.
-type AccountIndex = u32;
+pub type AccountIndex = u32;
 
 /// The default SRML call type.
 #[derive(Encode)]
