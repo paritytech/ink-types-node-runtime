@@ -35,7 +35,7 @@ contract! {
         pub(external) fn balance_transfer(&mut self, dest: AccountId, value: Balance) {
             let dest_addr = calls::Address::Id(dest);
             let transfer_call = calls::Balances::<NodeRuntimeTypes, AccountIndex>::transfer(dest_addr, value);
-            env.dispatch_call(transfer_call.into());
+            env.dispatch_call(transfer_call);
         }
     }
 }
