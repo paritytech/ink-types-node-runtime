@@ -30,7 +30,7 @@ pub enum Address<T: EnvTypes, AccountIndex> {
 }
 
 /// Returns `b` if `b` is greater than `a` and otherwise `None`.
-fn need_more_than<T: PartialOrd>(a: T, b: T) -> Option<T> {
+fn greater_than_or_none<T: PartialOrd>(a: T, b: T) -> Option<T> {
     if a < b { Some(b) } else { None }
 }
 
@@ -48,13 +48,13 @@ impl<T, AccountIndex> Decode for Address<T, AccountIndex> where
         Some(match input.read_byte()? {
             x @ 0x00..=0xef => Address::Index(AccountIndex::from(x as u32)),
             0xfc => Address::Index(AccountIndex::from(
-                need_more_than(0xef, u16::decode(input)?)? as u32
+                greater_than_or_none(0xef, u16::decode(input)?)? as u32
             )),
             0xfd => Address::Index(AccountIndex::from(
-                need_more_than(0xffff, u32::decode(input)?)?
+                greater_than_or_none(0xffff, u32::decode(input)?)?
             )),
             0xfe => Address::Index(
-                need_more_than(0xffffffffu32.into(), Decode::decode(input)?)?
+                greater_than_or_none(0xffffffffu32.into(), Decode::decode(input)?)?
             ),
             0xff => Address::Id(Decode::decode(input)?),
             _ => return None,
