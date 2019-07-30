@@ -18,7 +18,7 @@ categories = ["no-std", "embedded"]
 include = ["/Cargo.toml", "src/**/*.rs", "/README.md", "/LICENSE"]
 
 [dependencies]
-ink_core = { git = "https://github.com/paritytech/ink/", branch = "aj-dispatch-call", package = "ink_core", default-features = false }
+ink_core = { git = "https://github.com/paritytech/ink/", package = "ink_core", default-features = false }
 parity-codec = { version = "4.1", default-features = false, features = ["derive"] }
 
 [dev-dependencies]
