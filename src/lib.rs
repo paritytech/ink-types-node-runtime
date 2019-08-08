@@ -19,14 +19,13 @@
 
 #![cfg_attr(not(test), no_std)]
 
-use core::{
-    array::TryFromSliceError,
-    convert::TryFrom,
-};
+use core::{array::TryFromSliceError, convert::TryFrom};
+use parity_codec::{Decode, Encode};
 
-use parity_codec::{Encode, Decode};
+pub mod calls;
 
 /// Contract environment types defined in substrate node-runtime
+#[cfg_attr(feature = "std", derive(Debug, Clone, PartialEq, Eq))]
 pub enum NodeRuntimeTypes {}
 
 /// The default SRML address type.
@@ -73,20 +72,46 @@ impl<'a> TryFrom<&'a [u8]> for Hash {
 /// The default SRML moment type.
 pub type Moment = u64;
 
+/// The default SRML blocknumber type.
+pub type BlockNumber = u64;
+
+/// The default SRML AccountIndex type.
+pub type AccountIndex = u32;
+
+/// The default SRML call type.
+#[derive(Encode)]
+#[cfg_attr(feature = "std", derive(Decode, Debug, Clone, PartialEq, Eq))]
+pub enum Call {
+	#[codec(index = "5")]
+	Balances(calls::Balances<NodeRuntimeTypes, AccountIndex>),
+}
+
+impl From<calls::Balances<NodeRuntimeTypes, AccountIndex>> for Call {
+	fn from(balances_call: calls::Balances<NodeRuntimeTypes, AccountIndex>) -> Call {
+		Call::Balances(balances_call)
+	}
+}
+
 impl ink_core::env::EnvTypes for NodeRuntimeTypes {
     type AccountId = AccountId;
     type Balance = Balance;
     type Hash = Hash;
     type Moment = Moment;
+    type BlockNumber = BlockNumber;
+    type Call = Call;
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::fmt::Debug;
     use node_runtime::Runtime;
-    use parity_codec::{Encode, Decode, Codec};
+    use parity_codec::{Codec, Decode, Encode};
     use quickcheck_macros::quickcheck;
+    use std::fmt::Debug;
+
+    pub type AccountIdOf<T> = <T as srml_system::Trait>::AccountId;
+    pub type MomentOf<T> = <T as srml_timestamp::Trait>::Moment;
+    pub type SeedOf<T> = <T as srml_system::Trait>::Hash;
 
     macro_rules! impl_hash_quickcheck_arb_wrapper {
         ($inner:ident, $wrapper:ident) => {
@@ -97,7 +122,7 @@ mod tests {
                 fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Self {
                     let mut res = [0u8; core::mem::size_of::<Self>()];
                     g.fill_bytes(&mut res[..]);
-                    $wrapper($inner(res)) 
+                    $wrapper($inner(res))
                 }
             }
 
@@ -106,14 +131,14 @@ mod tests {
                     x.0
                 }
             }
-        }
+        };
     }
 
     impl_hash_quickcheck_arb_wrapper!(AccountId, ContractAccountId);
     impl_hash_quickcheck_arb_wrapper!(Hash, ContractHash);
 
     /// Ensure that a type is compatible with its equivalent runtime type
-    fn runtime_codec_roundtrip<ContractT, WrapperT, RuntimeT>(value: WrapperT) 
+    fn runtime_codec_roundtrip<ContractT, WrapperT, RuntimeT>(value: WrapperT)
     where
         ContractT: Codec + Debug + Eq + From<WrapperT>,
         RuntimeT: Codec,
@@ -130,7 +155,7 @@ mod tests {
 
     #[quickcheck]
     fn account_id(value: ContractAccountId) {
-        runtime_codec_roundtrip::<AccountId, ContractAccountId, srml_contract::AccountIdOf<Runtime>>(value);
+        runtime_codec_roundtrip::<AccountId, ContractAccountId, AccountIdOf<Runtime>>(value);
     }
 
     #[quickcheck]
@@ -140,11 +165,11 @@ mod tests {
 
     #[quickcheck]
     fn hash(value: ContractHash) {
-        runtime_codec_roundtrip::<Hash, ContractHash, srml_contract::SeedOf<Runtime>>(value);
+        runtime_codec_roundtrip::<Hash, ContractHash, SeedOf<Runtime>>(value);
     }
 
     #[quickcheck]
     pub fn moment(value: Moment) {
-        runtime_codec_roundtrip::<Moment, Moment, srml_contract::MomentOf<Runtime>>(value);
+        runtime_codec_roundtrip::<Moment, Moment, MomentOf<Runtime>>(value);
     }
 }
