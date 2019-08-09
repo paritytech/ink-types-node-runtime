@@ -9,7 +9,7 @@ ink_core = { git = "https://github.com/paritytech/ink/", package = "ink_core", d
 ink_model = { git = "https://github.com/paritytech/ink/", package = "ink_model", default-features = false }
 ink_lang = { git = "https://github.com/paritytech/ink/", package = "ink_lang", default-features = false }
 ink_types_node_runtime = { path = "../../", default-features = false }
-parity-codec = { version = "4.1", default-features = false, features = ["derive"] }
+parity-scale-codec = { version = "1.0", default-features = false, features = ["derive"] }
 
 [lib]
 name = "calls"

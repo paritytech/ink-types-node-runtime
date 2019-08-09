@@ -15,11 +15,12 @@
 // along with ink!.  If not, see <http://www.gnu.org/licenses/>.
 
 use ink_core::env::EnvTypes;
-use parity_codec::{
+use parity_scale_codec::{
     Decode,
     Encode,
     Input,
     Output,
+    Error,
 };
 use core::convert::TryInto;
 
@@ -30,8 +31,8 @@ pub enum Address<T: EnvTypes, AccountIndex> {
 }
 
 /// Returns `b` if `b` is greater than `a` and otherwise `None`.
-fn greater_than_or_none<T: PartialOrd>(a: T, b: T) -> Option<T> {
-    if a < b { Some(b) } else { None }
+fn greater_than_or_err<T: PartialOrd>(a: T, b: T) -> Result<T, Error> {
+    if a < b { Ok(b) } else { Err("Invalid range".into()) }
 }
 
 /// Decode implementation copied over from Substrate `Address` that can be found [here](substrate-address).
@@ -44,20 +45,20 @@ impl<T, AccountIndex> Decode for Address<T, AccountIndex> where
     T: EnvTypes,
     AccountIndex: Decode + From<u32> + PartialOrd + Copy + Clone,
 {
-    fn decode<I: Input>(input: &mut I) -> Option<Self> {
-        Some(match input.read_byte()? {
+    fn decode<I: Input>(input: &mut I) -> Result<Self, Error> {
+        Ok(match input.read_byte()? {
             x @ 0x00..=0xef => Address::Index(AccountIndex::from(x as u32)),
             0xfc => Address::Index(AccountIndex::from(
-                greater_than_or_none(0xef, u16::decode(input)?)? as u32
+                greater_than_or_err(0xef, u16::decode(input)?)? as u32
             )),
             0xfd => Address::Index(AccountIndex::from(
-                greater_than_or_none(0xffff, u32::decode(input)?)?
+                greater_than_or_err(0xffff, u32::decode(input)?)?
             )),
             0xfe => Address::Index(
-                greater_than_or_none(0xffffffffu32.into(), Decode::decode(input)?)?
+                greater_than_or_err(0xffffffffu32.into(), Decode::decode(input)?)?
             ),
             0xff => Address::Id(Decode::decode(input)?),
-            _ => return None,
+            _ => return Err("Invalid address variant".into()),
         })
     }
 }
@@ -121,7 +122,7 @@ mod tests {
     use crate::{calls, Call, NodeRuntimeTypes, AccountIndex};
 
     use node_runtime::{self, Runtime};
-    use parity_codec::{Decode, Encode};
+    use parity_scale_codec::{Decode, Encode};
     use srml_indices::address;
 
     #[test]
