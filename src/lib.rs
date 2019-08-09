@@ -20,7 +20,7 @@
 #![cfg_attr(not(test), no_std)]
 
 use core::{array::TryFromSliceError, convert::TryFrom};
-use parity_codec::{Decode, Encode};
+use parity_scale_codec::{Decode, Encode};
 
 pub mod calls;
 
@@ -105,7 +105,7 @@ impl ink_core::env::EnvTypes for NodeRuntimeTypes {
 mod tests {
     use super::*;
     use node_runtime::Runtime;
-    use parity_codec::{Codec, Decode, Encode};
+    use parity_scale_codec::{Codec, Decode, Encode};
     use quickcheck_macros::quickcheck;
     use std::fmt::Debug;
 

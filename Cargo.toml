@@ -19,7 +19,7 @@ include = ["/Cargo.toml", "src/**/*.rs", "/README.md", "/LICENSE"]
 
 [dependencies]
 ink_core = { git = "https://github.com/paritytech/ink/", package = "ink_core", default-features = false }
-parity-codec = { version = "4.1", default-features = false, features = ["derive"] }
+parity-scale-codec = { version = "1.0", default-features = false, features = ["derive"] }
 
 [dev-dependencies]
 node-runtime = { git = "https://github.com/paritytech/substrate/", package = "node-runtime", features = ["std"] }
@@ -33,9 +33,5 @@ quickcheck_macros = "0.8"
 [features]
 default = ["std"]
 std = [
-    "ink_core/std",
-]
-test-env = [
-    "std",
     "ink_core/test-env",
 ]
