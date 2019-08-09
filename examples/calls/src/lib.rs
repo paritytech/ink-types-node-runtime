@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with ink!.  If not, see <http://www.gnu.org/licenses/>.
 
-#![cfg_attr(not(any(test, feature = "test-env")), no_std)]
+#![cfg_attr(not("std"), no_std)]
 
 use ink_lang::contract;
 use ink_types_node_runtime::{calls, AccountIndex, NodeRuntimeTypes};

@@ -33,9 +33,5 @@ quickcheck_macros = "0.8"
 [features]
 default = ["std"]
 std = [
-    "ink_core/std",
-]
-test-env = [
-    "std",
     "ink_core/test-env",
 ]
