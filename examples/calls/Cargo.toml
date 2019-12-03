@@ -7,9 +7,14 @@ edition = "2018"
 [dependencies]
 ink_core = { git = "https://github.com/paritytech/ink/", package = "ink_core", default-features = false }
 ink_model = { git = "https://github.com/paritytech/ink/", package = "ink_model", default-features = false }
-ink_lang = { git = "https://github.com/paritytech/ink/", package = "ink_lang", default-features = false }
+ink_lang2 = { git = "https://github.com/paritytech/ink/", package = "ink_lang2", default-features = false }
 ink_types_node_runtime = { path = "../../", default-features = false }
-parity-scale-codec = { version = "1.0", default-features = false, features = ["derive"] }
+parity-scale-codec = { version = "1.1", default-features = false, features = ["derive"] }
+
+[patch.'https://github.com/paritytech/ink/']
+ink_core = { path = "../../../../../../../data/src/github.com/paritytech/ink/core", package = "ink_core", default-features = false }
+ink_model = { path = "../../../../../../../data/src/github.com/paritytech/ink/model", package = "ink_model", default-features = false }
+ink_lang2 = { path = "../../../../../../../data/src/github.com/paritytech/ink/lang2", package = "ink_lang2", default-features = false }
 
 [lib]
 name = "calls"
@@ -18,23 +23,23 @@ crate-type = ["cdylib"]
 [features]
 default = [
     "std",
-    "ink_lang/generate-api-description"
+    "ink_lang2/ink-generate-abi"
 ]
 std = [
     "ink_core/std",
     "ink_model/std",
-    "ink_lang/std",
+    "ink_lang2/std",
     "ink_types_node_runtime/std",
-    "parity-codec/std",
+    "parity-scale-codec/std",
 ]
 test-env = [
     "std",
     "ink_core/test-env",
     "ink_model/test-env",
-    "ink_lang/test-env",
+    "ink_lang2/test-env",
 ]
 generate-api-description = [
-    "ink_lang/generate-api-description"
+    "ink_lang2/ink-generate-abi"
 ]
 
 [profile.release]

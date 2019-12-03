@@ -14,41 +14,42 @@
 // You should have received a copy of the GNU General Public License
 // along with ink!.  If not, see <http://www.gnu.org/licenses/>.
 
-#![cfg_attr(not("std"), no_std)]
+#![feature(proc_macro_hygiene)]
+#![cfg_attr(not(feature = "std"), no_std)]
 
-use ink_lang::contract;
+use ink_lang2 as ink;
 use ink_types_node_runtime::{calls, AccountIndex, NodeRuntimeTypes};
 
-contract! {
-    #![env = NodeRuntimeTypes]
-
+#[ink::contract(version = "0.1.0", env = NodeRuntimeTypes)]
+mod runtime_calls {
     /// This simple dummy contract dispatches substrate runtime calls
-    struct Calls {}
+    #[ink(storage)]
+    struct RuntimeCalls {}
 
-    impl Deploy for Calls {
-        fn deploy(&mut self) {
-        }
-    }
+    impl RuntimeCalls {
+        #[ink(constructor)]
+        fn new(&mut self) {}
 
-    impl Calls {
         /// Dispatches a `transfer` call to the Balances srml module
-        pub(external) fn balance_transfer(&mut self, dest: AccountId, value: Balance) {
+        #[ink(message)]
+        fn balance_transfer(&self, dest: AccountId, value: Balance) {
             let dest_addr = calls::Address::Id(dest);
-            let transfer_call = calls::Balances::<NodeRuntimeTypes, AccountIndex>::transfer(dest_addr, value);
-            env.dispatch_call(transfer_call);
+            let transfer_call =
+                calls::Balances::<NodeRuntimeTypes, AccountIndex>::transfer(dest_addr, value);
+            self.env().invoke_runtime(transfer_call);
         }
     }
-}
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+    #[cfg(test)]
+    mod tests {
+        use super::*;
 
-    #[test]
-    fn dispatches_balances_call() {
-        let mut calls = Calls::deploy_mock();
-        assert_eq!(env::dispatched_calls().into_iter().count(), 0);
-        calls.balance_transfer(1, 10000);
-        assert_eq!(env::dispatched_calls().into_iter().count(), 1);
+        #[test]
+        fn dispatches_balances_call() {
+            let mut calls = RuntimeCalls::new();
+            assert_eq!(calls.env().dispatched_calls().into_iter().count(), 0);
+            calls.balance_transfer(1, 10000);
+            assert_eq!(calls.env().dispatched_calls().into_iter().count(), 1);
+        }
     }
 }

@@ -82,17 +82,17 @@ pub type AccountIndex = u32;
 #[derive(Encode)]
 #[cfg_attr(feature = "std", derive(Decode, Debug, Clone, PartialEq, Eq))]
 pub enum Call {
-	#[codec(index = "5")]
-	Balances(calls::Balances<NodeRuntimeTypes, AccountIndex>),
+    #[codec(index = "6")]
+    Balances(calls::Balances<NodeRuntimeTypes, AccountIndex>),
 }
 
 impl From<calls::Balances<NodeRuntimeTypes, AccountIndex>> for Call {
-	fn from(balances_call: calls::Balances<NodeRuntimeTypes, AccountIndex>) -> Call {
-		Call::Balances(balances_call)
-	}
+    fn from(balances_call: calls::Balances<NodeRuntimeTypes, AccountIndex>) -> Call {
+        Call::Balances(balances_call)
+    }
 }
 
-impl ink_core::env::EnvTypes for NodeRuntimeTypes {
+impl ink_core::env2::EnvTypes for NodeRuntimeTypes {
     type AccountId = AccountId;
     type Balance = Balance;
     type Hash = Hash;
