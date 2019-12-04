@@ -22,7 +22,7 @@ ink_core = { git = "https://github.com/paritytech/ink/", package = "ink_core", d
 parity-scale-codec = { version = "1.0", default-features = false, features = ["derive"] }
 
 [patch.'https://github.com/paritytech/ink/']
-ink_core = { path = "../../../../../data/src/github.com/paritytech/ink/core", package = "ink_core", default-features = false }
+ink_core = { path = "../../../../../data/src/github.com/liuchengxu/ink/core", package = "ink_core", default-features = false }
 
 [dev-dependencies]
 node-runtime = { git = "https://github.com/paritytech/substrate/", package = "node-runtime", features = ["std"] }

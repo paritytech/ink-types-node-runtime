@@ -25,7 +25,7 @@ use parity_scale_codec::{Decode, Encode};
 pub mod calls;
 
 /// Contract environment types defined in substrate node-runtime
-#[cfg_attr(feature = "std", derive(Debug, Clone, PartialEq, Eq))]
+#[cfg_attr(feature = "std", derive(Clone, PartialEq, Eq))]
 pub enum NodeRuntimeTypes {}
 
 /// The default SRML address type.
@@ -80,7 +80,7 @@ pub type AccountIndex = u32;
 
 /// The default SRML call type.
 #[derive(Encode)]
-#[cfg_attr(feature = "std", derive(Decode, Debug, Clone, PartialEq, Eq))]
+#[cfg_attr(feature = "std", derive(Decode, Clone, PartialEq, Eq))]
 pub enum Call {
     #[codec(index = "6")]
     Balances(calls::Balances<NodeRuntimeTypes, AccountIndex>),

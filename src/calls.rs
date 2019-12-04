@@ -18,7 +18,7 @@ use core::convert::TryInto;
 use ink_core::env2::EnvTypes;
 use parity_scale_codec::{Decode, Encode, Error, Input, Output};
 
-#[cfg_attr(feature = "std", derive(Debug, Clone, PartialEq, Eq))]
+#[cfg_attr(feature = "std", derive(Clone, PartialEq, Eq))]
 pub enum Address<T: EnvTypes, AccountIndex> {
     Id(T::AccountId),
     Index(AccountIndex),
@@ -104,7 +104,7 @@ where
 }
 
 #[derive(Encode)]
-#[cfg_attr(feature = "std", derive(Decode, Debug, Clone, PartialEq, Eq))]
+#[cfg_attr(feature = "std", derive(Decode, Clone, PartialEq, Eq))]
 pub enum Balances<T: EnvTypes, AccountIndex> {
     #[allow(non_camel_case_types)]
     transfer(Address<T, AccountIndex>, #[codec(compact)] T::Balance),
