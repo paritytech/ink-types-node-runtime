@@ -5,14 +5,14 @@ authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2018"
 
 [dependencies]
-ink_core = { git = "https://github.com/paritytech/ink", package = "ink_core", default-features = false }
-ink_lang2 = { git = "https://github.com/paritytech/ink", package = "ink_lang2", default-features = false }
+ink_core = { git = "https://github.com/paritytech/ink/", package = "ink_core", default-features = false }
+ink_lang2 = { git = "https://github.com/paritytech/ink/", package = "ink_lang2", default-features = false }
 ink_types_node_runtime = { path = "../../", default-features = false }
 parity-scale-codec = { version = "1.1", default-features = false, features = ["derive"] }
 
-[patch.'https://github.com/paritytech/ink']
-ink_core = { path = "../../../../../../../data/src/github.com/liuchengxu/ink/core", package = "ink_core", default-features = false }
-ink_lang2 = { path = "../../../../../../../data/src/github.com/liuchengxu/ink/lang2", package = "ink_lang2", default-features = false }
+[patch.'https://github.com/paritytech/ink/']
+ink_core = { git = "https://github.com/liuchengxu/ink/", branch = "migrate-ink-types-node-runtime-to-ink2.0", package = "ink_core", default-features = false }
+ink_lang2 = { git = "https://github.com/liuchengxu/ink/", branch = "migrate-ink-types-node-runtime-to-ink2.0", package = "ink_lang2", default-features = false }
 
 [lib]
 name = "calls"
