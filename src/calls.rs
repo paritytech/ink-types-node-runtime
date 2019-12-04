@@ -129,13 +129,14 @@ mod tests {
     fn account_index_serialization() {
         let account_index = 0u32;
 
-        let ink_address = Address::Index(account_index.into());
-        let srml_address: address::Address<[u8; 32], u32> = address::Address::Index(account_index);
+        let ink_address: Address<NodeRuntimeTypes, u32> = Address::Index(account_index.into());
+        let pallet_address: address::Address<[u8; 32], u32> =
+            address::Address::Index(account_index);
 
         let ink_encoded = ink_address.encode();
-        let srml_encoded = srml_address.encode();
+        let pallet_encoded = pallet_address.encode();
 
-        assert_eq!(srml_encoded, ink_encoded);
+        assert_eq!(pallet_encoded, ink_encoded);
 
         let srml_decoded: address::Address<[u8; 32], u32> =
             Decode::decode(&mut ink_encoded.as_slice())
@@ -145,7 +146,7 @@ mod tests {
             Decode::decode(&mut srml_encoded.as_slice())
                 .expect("Account Index decodes back to ink type");
 
-        assert_eq!(ink_address, ink_decoded);
+        assert!(ink_address == ink_decoded);
     }
 
     #[test]
@@ -168,7 +169,7 @@ mod tests {
             Decode::decode(&mut srml_encoded.as_slice())
                 .expect("Account Id decodes decodes back to ink type");
 
-        assert_eq!(ink_address, ink_decoded);
+        assert!(ink_address == ink_decoded);
     }
 
     #[test]
@@ -196,6 +197,6 @@ mod tests {
         let srml_call_encoded = srml_call_decoded.encode();
         let contract_call_decoded: Call = Decode::decode(&mut srml_call_encoded.as_slice())
             .expect("Balances transfer call decodes back to contract type");
-        assert_eq!(contract_call, contract_call_decoded);
+        assert!(contract_call == contract_call_decoded);
     }
 }
