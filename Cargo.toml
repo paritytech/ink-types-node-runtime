@@ -19,7 +19,9 @@ include = ["/Cargo.toml", "src/**/*.rs", "/README.md", "/LICENSE"]
 
 [dependencies]
 ink_core = { git = "https://github.com/paritytech/ink/", package = "ink_core", default-features = false }
-parity-scale-codec = { version = "1.0", default-features = false, features = ["derive"] }
+
+scale = { package = "parity-scale-codec", version = "1.1", default-features = false, features = ["derive"] }
+type-metadata = { git = "https://github.com/type-metadata/type-metadata.git", default-features = false, features = ["derive"], optional = true }
 
 [patch.'https://github.com/paritytech/ink/']
 ink_core = { git = "https://github.com/liuchengxu/ink/", branch = "migrate-ink-types-node-runtime-to-ink2.0", package = "ink_core", default-features = false }
@@ -37,4 +39,9 @@ quickcheck_macros = "0.8"
 default = ["std"]
 std = [
     "ink_core/test-env",
+]
+ink-generate-abi = [
+    "std",
+    "type-metadata",
+    "ink_core/ink-generate-abi",
 ]

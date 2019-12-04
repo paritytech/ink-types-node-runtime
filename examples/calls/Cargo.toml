@@ -1,7 +1,7 @@
 [package]
 name = "calls"
 version = "0.1.0"
-authors = ["[your_name] <[your_email]>"]
+authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2018"
 
 [dependencies]
@@ -46,6 +46,7 @@ ink-generate-abi = [
     "type-metadata",
     "ink_core/ink-generate-abi",
     "ink_lang2/ink-generate-abi",
+    "ink_types_node_runtime/ink-generate-abi",
 ]
 ink-as-dependency = []
 

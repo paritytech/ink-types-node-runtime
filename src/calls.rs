@@ -16,7 +16,7 @@
 
 use core::convert::TryInto;
 use ink_core::env2::EnvTypes;
-use parity_scale_codec::{Decode, Encode, Error, Input, Output};
+use scale::{Decode, Encode, Error, Input, Output};
 
 #[cfg_attr(feature = "std", derive(Clone, PartialEq, Eq))]
 pub enum Address<T: EnvTypes, AccountIndex> {
@@ -123,7 +123,7 @@ mod tests {
 
     use node_runtime::{self, Runtime};
     use pallet_indices::address;
-    use parity_scale_codec::{Decode, Encode};
+    use scale::{Decode, Encode};
 
     #[test]
     fn account_index_serialization() {

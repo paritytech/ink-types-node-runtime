@@ -17,19 +17,21 @@
 //! Definitions for environment types for contracts targeted at a
 //! substrate chain with the default `node-runtime` configuration.
 
-#![cfg_attr(not(test), no_std)]
+#![cfg_attr(not(feature = "std"), no_std)]
 
 use core::{array::TryFromSliceError, convert::TryFrom};
-use parity_scale_codec::{Decode, Encode};
+use scale::{Decode, Encode};
 
 pub mod calls;
 
 /// Contract environment types defined in substrate node-runtime
 #[cfg_attr(feature = "std", derive(Clone, PartialEq, Eq))]
+#[cfg_attr(feature = "ink-generate-abi", derive(type_metadata::Metadata))]
 pub enum NodeRuntimeTypes {}
 
 /// The default SRML address type.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Encode, Decode)]
+#[cfg_attr(feature = "ink-generate-abi", derive(type_metadata::Metadata))]
 pub struct AccountId([u8; 32]);
 
 impl From<[u8; 32]> for AccountId {
@@ -105,8 +107,8 @@ impl ink_core::env2::EnvTypes for NodeRuntimeTypes {
 mod tests {
     use super::*;
     use node_runtime::Runtime;
-    use parity_scale_codec::{Codec, Decode, Encode};
     use quickcheck_macros::quickcheck;
+    use scale::{Codec, Decode, Encode};
     use std::fmt::Debug;
 
     pub type AccountIdOf<T> = <T as frame_system::Trait>::AccountId;
