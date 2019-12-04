@@ -26,10 +26,10 @@ ink_core = { path = "../../../../../data/src/github.com/liuchengxu/ink/core", pa
 
 [dev-dependencies]
 node-runtime = { git = "https://github.com/paritytech/substrate/", package = "node-runtime", features = ["std"] }
-srml-system = { git = "https://github.com/paritytech/substrate/", package = "frame-system", features = ["std"] }
-srml-timestamp = { git = "https://github.com/paritytech/substrate/", package = "pallet-timestamp", features = ["std"] }
-srml-contract = { git = "https://github.com/paritytech/substrate/", package = "pallet-contracts", features = ["std"] }
-srml-indices = { git = "https://github.com/paritytech/substrate/", package = "pallet-indices", features = ["std"] }
+frame-system = { git = "https://github.com/paritytech/substrate/", package = "frame-system", features = ["std"] }
+pallet-timestamp = { git = "https://github.com/paritytech/substrate/", package = "pallet-timestamp", features = ["std"] }
+pallet-contract = { git = "https://github.com/paritytech/substrate/", package = "pallet-contracts", features = ["std"] }
+pallet-indices = { git = "https://github.com/paritytech/substrate/", package = "pallet-indices", features = ["std"] }
 quickcheck = "0.8"
 quickcheck_macros = "0.8"
 

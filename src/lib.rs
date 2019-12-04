@@ -109,9 +109,9 @@ mod tests {
     use quickcheck_macros::quickcheck;
     use std::fmt::Debug;
 
-    pub type AccountIdOf<T> = <T as srml_system::Trait>::AccountId;
-    pub type MomentOf<T> = <T as srml_timestamp::Trait>::Moment;
-    pub type SeedOf<T> = <T as srml_system::Trait>::Hash;
+    pub type AccountIdOf<T> = <T as frame_system::Trait>::AccountId;
+    pub type MomentOf<T> = <T as pallet_timestamp::Trait>::Moment;
+    pub type SeedOf<T> = <T as frame_system::Trait>::Hash;
 
     macro_rules! impl_hash_quickcheck_arb_wrapper {
         ($inner:ident, $wrapper:ident) => {
@@ -160,7 +160,7 @@ mod tests {
 
     #[quickcheck]
     fn balance(value: Balance) {
-        runtime_codec_roundtrip::<Balance, Balance, srml_contract::BalanceOf<Runtime>>(value);
+        runtime_codec_roundtrip::<Balance, Balance, pallet_contract::BalanceOf<Runtime>>(value);
     }
 
     #[quickcheck]
