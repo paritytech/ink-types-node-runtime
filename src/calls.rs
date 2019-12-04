@@ -122,8 +122,8 @@ mod tests {
     use crate::{calls, AccountIndex, Call, NodeRuntimeTypes};
 
     use node_runtime::{self, Runtime};
+    use pallet_indices::address;
     use parity_scale_codec::{Decode, Encode};
-    use srml_indices::address;
 
     #[test]
     fn account_index_serialization() {
