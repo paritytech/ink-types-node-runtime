@@ -2,7 +2,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use ink_lang2 as ink;
-use ink_types_node_runtime::{calls as runtime_calls, AccountIndex, NodeRuntimeTypes};
+use ink_types_node_runtime::{calls as runtime_calls, AccountIndex, Call, NodeRuntimeTypes};
 
 #[ink::contract(version = "0.1.0", env = NodeRuntimeTypes)]
 mod calls {
@@ -18,9 +18,10 @@ mod calls {
         #[ink(message)]
         fn balance_transfer(&self, dest: AccountId, value: Balance) {
             let dest_addr = runtime_calls::Address::Id(dest);
-            let transfer_call = runtime_calls::Balances::<NodeRuntimeTypes, AccountIndex>::transfer(
-                dest_addr, value,
-            );
+            let transfer_call = Call::Balances(runtime_calls::Balances::<
+                NodeRuntimeTypes,
+                AccountIndex,
+            >::transfer(dest_addr, value));
             self.env().invoke_runtime(&transfer_call);
         }
     }
