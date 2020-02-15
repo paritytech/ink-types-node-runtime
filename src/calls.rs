@@ -15,7 +15,7 @@
 // along with ink!.  If not, see <http://www.gnu.org/licenses/>.
 
 use core::convert::TryInto;
-use ink_core::env2::EnvTypes;
+use ink_core::env::EnvTypes;
 use scale::{Decode, Encode, Error, Input, Output};
 
 #[cfg_attr(feature = "std", derive(Clone, PartialEq, Eq))]
@@ -103,8 +103,8 @@ where
     }
 }
 
-#[derive(Encode)]
-#[cfg_attr(feature = "std", derive(Decode, Clone, PartialEq, Eq))]
+#[derive(Encode, Decode)]
+#[cfg_attr(feature = "std", derive(Clone, PartialEq, Eq))]
 pub enum Balances<T: EnvTypes, AccountIndex> {
     #[allow(non_camel_case_types)]
     transfer(Address<T, AccountIndex>, #[codec(compact)] T::Balance),

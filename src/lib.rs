@@ -20,6 +20,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use core::{array::TryFromSliceError, convert::TryFrom};
+use ink_core::env::Clear;
 use scale::{Decode, Encode};
 
 pub mod calls;
@@ -30,7 +31,7 @@ pub mod calls;
 pub enum NodeRuntimeTypes {}
 
 /// The default SRML address type.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Encode, Decode)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Encode, Decode)]
 #[cfg_attr(feature = "ink-generate-abi", derive(type_metadata::Metadata))]
 pub struct AccountId([u8; 32]);
 
@@ -53,7 +54,7 @@ impl<'a> TryFrom<&'a [u8]> for AccountId {
 pub type Balance = u128;
 
 /// The default SRML hash type.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Encode, Decode)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Encode, Decode)]
 pub struct Hash([u8; 32]);
 
 impl From<[u8; 32]> for Hash {
@@ -71,6 +72,28 @@ impl<'a> TryFrom<&'a [u8]> for Hash {
     }
 }
 
+impl AsRef<[u8]> for Hash {
+    fn as_ref(&self) -> &[u8] {
+        &self.0[..]
+    }
+}
+
+impl AsMut<[u8]> for Hash {
+    fn as_mut(&mut self) -> &mut [u8] {
+        &mut self.0[..]
+    }
+}
+
+impl Clear for Hash {
+    fn is_clear(&self) -> bool {
+        self.as_ref().iter().all(|&byte| byte == 0x00)
+    }
+
+    fn clear() -> Self {
+        Self([0x00; 32])
+    }
+}
+
 /// The default SRML moment type.
 pub type Moment = u64;
 
@@ -80,9 +103,12 @@ pub type BlockNumber = u64;
 /// The default SRML AccountIndex type.
 pub type AccountIndex = u32;
 
+/// The default timestamp type.
+pub type Timestamp = u64;
+
 /// The default SRML call type.
-#[derive(Encode)]
-#[cfg_attr(feature = "std", derive(Decode, Clone, PartialEq, Eq))]
+#[derive(Encode, Decode)]
+#[cfg_attr(feature = "std", derive(Clone, PartialEq, Eq))]
 pub enum Call {
     #[codec(index = "6")]
     Balances(calls::Balances<NodeRuntimeTypes, AccountIndex>),
@@ -94,11 +120,11 @@ impl From<calls::Balances<NodeRuntimeTypes, AccountIndex>> for Call {
     }
 }
 
-impl ink_core::env2::EnvTypes for NodeRuntimeTypes {
+impl ink_core::env::EnvTypes for NodeRuntimeTypes {
     type AccountId = AccountId;
     type Balance = Balance;
     type Hash = Hash;
-    type Moment = Moment;
+    type Timestamp = Timestamp;
     type BlockNumber = BlockNumber;
     type Call = Call;
 }

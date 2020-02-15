@@ -1,11 +1,12 @@
 #![feature(proc_macro_hygiene)]
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use ink_lang2 as ink;
-use ink_types_node_runtime::{calls as runtime_calls, AccountIndex, Call, NodeRuntimeTypes};
+use ink_lang as ink;
 
 #[ink::contract(version = "0.1.0", env = NodeRuntimeTypes)]
 mod calls {
+    use ink_types_node_runtime::{calls as runtime_calls, AccountIndex, Call, NodeRuntimeTypes};
+
     /// This simple dummy contract dispatches substrate runtime calls
     #[ink(storage)]
     struct Calls {}
@@ -22,7 +23,7 @@ mod calls {
                 NodeRuntimeTypes,
                 AccountIndex,
             >::transfer(dest_addr, value));
-            self.env().invoke_runtime(&transfer_call);
+            let _ = self.env().invoke_runtime(&transfer_call);
         }
     }
 

@@ -23,9 +23,6 @@ ink_core = { git = "https://github.com/paritytech/ink/", package = "ink_core", d
 scale = { package = "parity-scale-codec", version = "1.1", default-features = false, features = ["derive"] }
 type-metadata = { git = "https://github.com/type-metadata/type-metadata.git", default-features = false, features = ["derive"], optional = true }
 
-[patch.'https://github.com/paritytech/ink/']
-ink_core = { git = "https://github.com/liuchengxu/ink/", branch = "migrate-ink-types-node-runtime-to-ink2.0", package = "ink_core", default-features = false }
-
 [dev-dependencies]
 node-runtime = { git = "https://github.com/paritytech/substrate/", package = "node-runtime", features = ["std"] }
 frame-system = { git = "https://github.com/paritytech/substrate/", package = "frame-system", features = ["std"] }
@@ -38,7 +35,7 @@ quickcheck_macros = "0.8"
 [features]
 default = ["std"]
 std = [
-    "ink_core/test-env",
+    "ink_core/std",
 ]
 ink-generate-abi = [
     "std",
