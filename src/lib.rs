@@ -27,8 +27,8 @@ use sp_core::crypto::AccountId32 as AccountId;
 pub mod calls;
 
 /// Contract environment types defined in substrate node-runtime
-#[cfg_attr(feature = "std", derive(Clone, PartialEq, Eq))]
 #[cfg_attr(feature = "ink-generate-abi", derive(type_metadata::Metadata))]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum NodeRuntimeTypes {}
 
 /// The default SRML balance type.
@@ -108,77 +108,4 @@ impl ink_core::env::EnvTypes for NodeRuntimeTypes {
     type Timestamp = Timestamp;
     type BlockNumber = BlockNumber;
     type Call = Call;
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use node_runtime::Runtime;
-    use quickcheck_macros::quickcheck;
-    use scale::{Codec, Decode, Encode};
-    use std::fmt::Debug;
-
-    pub type AccountIdOf<T> = <T as frame_system::Trait>::AccountId;
-    pub type MomentOf<T> = <T as pallet_timestamp::Trait>::Moment;
-    pub type SeedOf<T> = <T as frame_system::Trait>::Hash;
-
-    macro_rules! impl_hash_quickcheck_arb_wrapper {
-        ($inner:ident, $wrapper:ident) => {
-            #[derive(Debug, Clone)]
-            struct $wrapper($inner);
-
-            impl quickcheck::Arbitrary for $wrapper {
-                fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Self {
-                    let mut res = [0u8; core::mem::size_of::<Self>()];
-                    g.fill_bytes(&mut res[..]);
-                    $wrapper($inner(res))
-                }
-            }
-
-            impl From<$wrapper> for $inner {
-                fn from(x: $wrapper) -> Self {
-                    x.0
-                }
-            }
-        };
-    }
-
-    impl_hash_quickcheck_arb_wrapper!(AccountId, ContractAccountId);
-    impl_hash_quickcheck_arb_wrapper!(Hash, ContractHash);
-
-    /// Ensure that a type is compatible with its equivalent runtime type
-    fn runtime_codec_roundtrip<ContractT, WrapperT, RuntimeT>(value: WrapperT)
-    where
-        ContractT: Codec + Debug + Eq + From<WrapperT>,
-        RuntimeT: Codec,
-    {
-        let contract_value: ContractT = value.into();
-        let contract_encoded = Encode::encode(&contract_value);
-        let runtime_decoded: RuntimeT = Decode::decode(&mut contract_encoded.as_slice())
-            .expect("Should be decodable into node_runtime type");
-        let runtime_encoded = Encode::encode(&runtime_decoded);
-        let contract_decoded: ContractT = Decode::decode(&mut runtime_encoded.as_slice())
-            .expect("Should be decodable into contract env type");
-        assert_eq!(contract_value, contract_decoded)
-    }
-
-    #[quickcheck]
-    fn account_id(value: ContractAccountId) {
-        runtime_codec_roundtrip::<AccountId, ContractAccountId, AccountIdOf<Runtime>>(value);
-    }
-
-    #[quickcheck]
-    fn balance(value: Balance) {
-        runtime_codec_roundtrip::<Balance, Balance, pallet_contract::BalanceOf<Runtime>>(value);
-    }
-
-    #[quickcheck]
-    fn hash(value: ContractHash) {
-        runtime_codec_roundtrip::<Hash, ContractHash, SeedOf<Runtime>>(value);
-    }
-
-    #[quickcheck]
-    pub fn moment(value: Moment) {
-        runtime_codec_roundtrip::<Moment, Moment, MomentOf<Runtime>>(value);
-    }
 }

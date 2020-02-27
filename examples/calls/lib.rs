@@ -18,11 +18,10 @@ mod calls {
         /// Dispatches a `transfer` call to the Balances srml module
         #[ink(message)]
         fn balance_transfer(&self, dest: AccountId, value: Balance) {
-            let dest_addr = runtime_calls::Address::Id(dest);
             let transfer_call = Call::Balances(runtime_calls::Balances::<
                 NodeRuntimeTypes,
                 AccountIndex,
-            >::transfer(dest_addr, value));
+            >::transfer(dest.into(), value));
             let _ = self.env().invoke_runtime(&transfer_call);
         }
     }
