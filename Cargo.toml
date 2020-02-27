@@ -19,23 +19,25 @@ include = ["/Cargo.toml", "src/**/*.rs", "/README.md", "/LICENSE"]
 
 [dependencies]
 ink_core = { git = "https://github.com/paritytech/ink/", package = "ink_core", default-features = false }
-
+frame-system = { git = "https://github.com/paritytech/substrate/", package = "frame-system", default-features = false }
+#pallet-indices = { git = "https://github.com/paritytech/substrate/", package = "pallet-indices", default-features = false }
+#pallet-timestamp = { git = "https://github.com/paritytech/substrate/", package = "pallet-timestamp",  default-features = false }
+#pallet-contract = { git = "https://github.com/paritytech/substrate/", package = "pallet-contracts",  default-features = false }
+#node-runtime = { git = "https://github.com/paritytech/substrate/", package = "node-runtime", default-features = false }
+sp-core = { git = "https://github.com/paritytech/substrate/", package = "sp-core", default-features = false }
 scale = { package = "parity-scale-codec", version = "1.1", default-features = false, features = ["derive"] }
 type-metadata = { git = "https://github.com/type-metadata/type-metadata.git", default-features = false, features = ["derive"], optional = true }
-
-[dev-dependencies]
-node-runtime = { git = "https://github.com/paritytech/substrate/", package = "node-runtime", features = ["std"] }
-frame-system = { git = "https://github.com/paritytech/substrate/", package = "frame-system", features = ["std"] }
-pallet-timestamp = { git = "https://github.com/paritytech/substrate/", package = "pallet-timestamp", features = ["std"] }
-pallet-contract = { git = "https://github.com/paritytech/substrate/", package = "pallet-contracts", features = ["std"] }
-pallet-indices = { git = "https://github.com/paritytech/substrate/", package = "pallet-indices", features = ["std"] }
-quickcheck = "0.8"
-quickcheck_macros = "0.8"
 
 [features]
 default = ["std"]
 std = [
     "ink_core/std",
+    "frame-system/std",
+#    "pallet-indices/std",
+#    "pallet-timestamp/std",
+#    "pallet-contract/std",
+    "sp-core/std",
+#    "node-runtime/std",
 ]
 ink-generate-abi = [
     "std",

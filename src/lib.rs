@@ -22,6 +22,7 @@
 use core::{array::TryFromSliceError, convert::TryFrom};
 use ink_core::env::Clear;
 use scale::{Decode, Encode};
+use sp_core::crypto::AccountId32 as AccountId;
 
 pub mod calls;
 
@@ -29,26 +30,6 @@ pub mod calls;
 #[cfg_attr(feature = "std", derive(Clone, PartialEq, Eq))]
 #[cfg_attr(feature = "ink-generate-abi", derive(type_metadata::Metadata))]
 pub enum NodeRuntimeTypes {}
-
-/// The default SRML address type.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Encode, Decode)]
-#[cfg_attr(feature = "ink-generate-abi", derive(type_metadata::Metadata))]
-pub struct AccountId([u8; 32]);
-
-impl From<[u8; 32]> for AccountId {
-    fn from(address: [u8; 32]) -> AccountId {
-        AccountId(address)
-    }
-}
-
-impl<'a> TryFrom<&'a [u8]> for AccountId {
-    type Error = TryFromSliceError;
-
-    fn try_from(bytes: &'a [u8]) -> Result<AccountId, TryFromSliceError> {
-        let address = <[u8; 32]>::try_from(bytes)?;
-        Ok(AccountId(address))
-    }
-}
 
 /// The default SRML balance type.
 pub type Balance = u128;
