@@ -19,19 +19,26 @@ include = ["/Cargo.toml", "src/**/*.rs", "/README.md", "/LICENSE"]
 
 [dependencies]
 ink_core = { git = "https://github.com/paritytech/ink/", package = "ink_core", default-features = false }
-parity-scale-codec = { version = "1.0", default-features = false, features = ["derive"] }
+
+scale = { package = "parity-scale-codec", version = "1.1", default-features = false, features = ["derive"] }
+type-metadata = { git = "https://github.com/type-metadata/type-metadata.git", default-features = false, features = ["derive"], optional = true }
 
 [dev-dependencies]
 node-runtime = { git = "https://github.com/paritytech/substrate/", package = "node-runtime", features = ["std"] }
-srml-system = { git = "https://github.com/paritytech/substrate/", package = "srml-system", features = ["std"] }
-srml-timestamp = { git = "https://github.com/paritytech/substrate/", package = "srml-timestamp", features = ["std"] }
-srml-contract = { git = "https://github.com/paritytech/substrate/", package = "srml-contracts", features = ["core"] }
-srml-indices = { git = "https://github.com/paritytech/substrate/", package = "srml-indices", features = ["std"] }
+frame-system = { git = "https://github.com/paritytech/substrate/", package = "frame-system", features = ["std"] }
+pallet-timestamp = { git = "https://github.com/paritytech/substrate/", package = "pallet-timestamp", features = ["std"] }
+pallet-contract = { git = "https://github.com/paritytech/substrate/", package = "pallet-contracts", features = ["std"] }
+pallet-indices = { git = "https://github.com/paritytech/substrate/", package = "pallet-indices", features = ["std"] }
 quickcheck = "0.8"
 quickcheck_macros = "0.8"
 
 [features]
 default = ["std"]
 std = [
-    "ink_core/test-env",
+    "ink_core/std",
+]
+ink-generate-abi = [
+    "std",
+    "type-metadata",
+    "ink_core/ink-generate-abi",
 ]

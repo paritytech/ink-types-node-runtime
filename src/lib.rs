@@ -17,19 +17,22 @@
 //! Definitions for environment types for contracts targeted at a
 //! substrate chain with the default `node-runtime` configuration.
 
-#![cfg_attr(not(test), no_std)]
+#![cfg_attr(not(feature = "std"), no_std)]
 
 use core::{array::TryFromSliceError, convert::TryFrom};
-use parity_scale_codec::{Decode, Encode};
+use ink_core::env::Clear;
+use scale::{Decode, Encode};
 
 pub mod calls;
 
 /// Contract environment types defined in substrate node-runtime
-#[cfg_attr(feature = "std", derive(Debug, Clone, PartialEq, Eq))]
+#[cfg_attr(feature = "std", derive(Clone, PartialEq, Eq))]
+#[cfg_attr(feature = "ink-generate-abi", derive(type_metadata::Metadata))]
 pub enum NodeRuntimeTypes {}
 
 /// The default SRML address type.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Encode, Decode)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Encode, Decode)]
+#[cfg_attr(feature = "ink-generate-abi", derive(type_metadata::Metadata))]
 pub struct AccountId([u8; 32]);
 
 impl From<[u8; 32]> for AccountId {
@@ -51,7 +54,7 @@ impl<'a> TryFrom<&'a [u8]> for AccountId {
 pub type Balance = u128;
 
 /// The default SRML hash type.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Encode, Decode)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Encode, Decode)]
 pub struct Hash([u8; 32]);
 
 impl From<[u8; 32]> for Hash {
@@ -69,6 +72,28 @@ impl<'a> TryFrom<&'a [u8]> for Hash {
     }
 }
 
+impl AsRef<[u8]> for Hash {
+    fn as_ref(&self) -> &[u8] {
+        &self.0[..]
+    }
+}
+
+impl AsMut<[u8]> for Hash {
+    fn as_mut(&mut self) -> &mut [u8] {
+        &mut self.0[..]
+    }
+}
+
+impl Clear for Hash {
+    fn is_clear(&self) -> bool {
+        self.as_ref().iter().all(|&byte| byte == 0x00)
+    }
+
+    fn clear() -> Self {
+        Self([0x00; 32])
+    }
+}
+
 /// The default SRML moment type.
 pub type Moment = u64;
 
@@ -78,25 +103,28 @@ pub type BlockNumber = u64;
 /// The default SRML AccountIndex type.
 pub type AccountIndex = u32;
 
+/// The default timestamp type.
+pub type Timestamp = u64;
+
 /// The default SRML call type.
-#[derive(Encode)]
-#[cfg_attr(feature = "std", derive(Decode, Debug, Clone, PartialEq, Eq))]
+#[derive(Encode, Decode)]
+#[cfg_attr(feature = "std", derive(Clone, PartialEq, Eq))]
 pub enum Call {
-	#[codec(index = "5")]
-	Balances(calls::Balances<NodeRuntimeTypes, AccountIndex>),
+    #[codec(index = "6")]
+    Balances(calls::Balances<NodeRuntimeTypes, AccountIndex>),
 }
 
 impl From<calls::Balances<NodeRuntimeTypes, AccountIndex>> for Call {
-	fn from(balances_call: calls::Balances<NodeRuntimeTypes, AccountIndex>) -> Call {
-		Call::Balances(balances_call)
-	}
+    fn from(balances_call: calls::Balances<NodeRuntimeTypes, AccountIndex>) -> Call {
+        Call::Balances(balances_call)
+    }
 }
 
 impl ink_core::env::EnvTypes for NodeRuntimeTypes {
     type AccountId = AccountId;
     type Balance = Balance;
     type Hash = Hash;
-    type Moment = Moment;
+    type Timestamp = Timestamp;
     type BlockNumber = BlockNumber;
     type Call = Call;
 }
@@ -105,13 +133,13 @@ impl ink_core::env::EnvTypes for NodeRuntimeTypes {
 mod tests {
     use super::*;
     use node_runtime::Runtime;
-    use parity_scale_codec::{Codec, Decode, Encode};
     use quickcheck_macros::quickcheck;
+    use scale::{Codec, Decode, Encode};
     use std::fmt::Debug;
 
-    pub type AccountIdOf<T> = <T as srml_system::Trait>::AccountId;
-    pub type MomentOf<T> = <T as srml_timestamp::Trait>::Moment;
-    pub type SeedOf<T> = <T as srml_system::Trait>::Hash;
+    pub type AccountIdOf<T> = <T as frame_system::Trait>::AccountId;
+    pub type MomentOf<T> = <T as pallet_timestamp::Trait>::Moment;
+    pub type SeedOf<T> = <T as frame_system::Trait>::Hash;
 
     macro_rules! impl_hash_quickcheck_arb_wrapper {
         ($inner:ident, $wrapper:ident) => {
@@ -160,7 +188,7 @@ mod tests {
 
     #[quickcheck]
     fn balance(value: Balance) {
-        runtime_codec_roundtrip::<Balance, Balance, srml_contract::BalanceOf<Runtime>>(value);
+        runtime_codec_roundtrip::<Balance, Balance, pallet_contract::BalanceOf<Runtime>>(value);
     }
 
     #[quickcheck]

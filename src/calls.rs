@@ -14,17 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with ink!.  If not, see <http://www.gnu.org/licenses/>.
 
-use ink_core::env::EnvTypes;
-use parity_scale_codec::{
-    Decode,
-    Encode,
-    Input,
-    Output,
-    Error,
-};
 use core::convert::TryInto;
+use ink_core::env::EnvTypes;
+use scale::{Decode, Encode, Error, Input, Output};
 
-#[cfg_attr(feature = "std", derive(Debug, Clone, PartialEq, Eq))]
+#[cfg_attr(feature = "std", derive(Clone, PartialEq, Eq))]
 pub enum Address<T: EnvTypes, AccountIndex> {
     Id(T::AccountId),
     Index(AccountIndex),
@@ -32,7 +26,11 @@ pub enum Address<T: EnvTypes, AccountIndex> {
 
 /// Returns `b` if `b` is greater than `a` and otherwise `None`.
 fn greater_than_or_err<T: PartialOrd>(a: T, b: T) -> Result<T, Error> {
-    if a < b { Ok(b) } else { Err("Invalid range".into()) }
+    if a < b {
+        Ok(b)
+    } else {
+        Err("Invalid range".into())
+    }
 }
 
 /// Decode implementation copied over from Substrate `Address` that can be found [here](substrate-address).
@@ -41,22 +39,26 @@ fn greater_than_or_err<T: PartialOrd>(a: T, b: T) -> Result<T, Error> {
 /// This implementation MUST be kept in sync with substrate, tests below will ensure that.
 ///
 /// [substrate-address]: https://github.com/paritytech/substrate/blob/ec62d24c602912f07bbc416711376d9b8e5782c5/srml/indices/src/address.rs#L61
-impl<T, AccountIndex> Decode for Address<T, AccountIndex> where
+impl<T, AccountIndex> Decode for Address<T, AccountIndex>
+where
     T: EnvTypes,
     AccountIndex: Decode + From<u32> + PartialOrd + Copy + Clone,
 {
     fn decode<I: Input>(input: &mut I) -> Result<Self, Error> {
         Ok(match input.read_byte()? {
             x @ 0x00..=0xef => Address::Index(AccountIndex::from(x as u32)),
-            0xfc => Address::Index(AccountIndex::from(
-                greater_than_or_err(0xef, u16::decode(input)?)? as u32
-            )),
-            0xfd => Address::Index(AccountIndex::from(
-                greater_than_or_err(0xffff, u32::decode(input)?)?
-            )),
-            0xfe => Address::Index(
-                greater_than_or_err(0xffffffffu32.into(), Decode::decode(input)?)?
-            ),
+            0xfc => Address::Index(AccountIndex::from(greater_than_or_err(
+                0xef,
+                u16::decode(input)?,
+            )? as u32)),
+            0xfd => Address::Index(AccountIndex::from(greater_than_or_err(
+                0xffff,
+                u32::decode(input)?,
+            )?)),
+            0xfe => Address::Index(greater_than_or_err(
+                0xffffffffu32.into(),
+                Decode::decode(input)?,
+            )?),
             0xff => Address::Id(Decode::decode(input)?),
             _ => return Err("Invalid address variant".into()),
         })
@@ -69,7 +71,8 @@ impl<T, AccountIndex> Decode for Address<T, AccountIndex> where
 /// This implementation MUST be kept in sync with substrate, tests below will ensure that.
 ///
 /// [substrate-address]: https://github.com/paritytech/substrate/blob/ec62d24c602912f07bbc416711376d9b8e5782c5/srml/indices/src/address.rs#L83
-impl<T, AccountIndex> Encode for Address<T, AccountIndex> where
+impl<T, AccountIndex> Encode for Address<T, AccountIndex>
+where
     T: EnvTypes,
     AccountIndex: Encode + TryInto<u32> + Copy + Clone,
 {
@@ -85,26 +88,23 @@ impl<T, AccountIndex> Encode for Address<T, AccountIndex> where
                     if x > 0xffff {
                         dest.push_byte(253);
                         dest.push(&x);
-                    }
-                    else if x >= 0xf0 {
+                    } else if x >= 0xf0 {
                         dest.push_byte(252);
                         dest.push(&(x as u16));
-                    }
-                    else {
+                    } else {
                         dest.push_byte(x as u8);
                     }
-
                 } else {
                     dest.push_byte(254);
                     dest.push(&i);
                 }
-            },
+            }
         }
     }
 }
 
-#[derive(Encode)]
-#[cfg_attr(feature = "std", derive(Decode, Debug, Clone, PartialEq, Eq))]
+#[derive(Encode, Decode)]
+#[cfg_attr(feature = "std", derive(Clone, PartialEq, Eq))]
 pub enum Balances<T: EnvTypes, AccountIndex> {
     #[allow(non_camel_case_types)]
     transfer(Address<T, AccountIndex>, #[codec(compact)] T::Balance),
@@ -119,31 +119,34 @@ pub enum Balances<T: EnvTypes, AccountIndex> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{calls, Call, NodeRuntimeTypes, AccountIndex};
+    use crate::{calls, AccountIndex, Call, NodeRuntimeTypes};
 
     use node_runtime::{self, Runtime};
-    use parity_scale_codec::{Decode, Encode};
-    use srml_indices::address;
+    use pallet_indices::address;
+    use scale::{Decode, Encode};
 
     #[test]
     fn account_index_serialization() {
         let account_index = 0u32;
 
-        let ink_address = Address::Index(account_index.into());
-        let srml_address: address::Address<[u8; 32], u32> = address::Address::Index(account_index);
+        let ink_address: Address<NodeRuntimeTypes, u32> = Address::Index(account_index.into());
+        let pallet_address: address::Address<[u8; 32], u32> =
+            address::Address::Index(account_index);
 
         let ink_encoded = ink_address.encode();
-        let srml_encoded = srml_address.encode();
+        let pallet_encoded = pallet_address.encode();
 
-        assert_eq!(srml_encoded, ink_encoded);
+        assert_eq!(pallet_encoded, ink_encoded);
 
-        let srml_decoded: address::Address<[u8; 32], u32> = Decode::decode(&mut ink_encoded.as_slice())
-            .expect("Account Index decodes to srml Address");
+        let srml_decoded: address::Address<[u8; 32], u32> =
+            Decode::decode(&mut ink_encoded.as_slice())
+                .expect("Account Index decodes to srml Address");
         let srml_encoded = srml_decoded.encode();
-        let ink_decoded: Address<NodeRuntimeTypes, u32> = Decode::decode(&mut srml_encoded.as_slice())
-            .expect("Account Index decodes back to ink type");
+        let ink_decoded: Address<NodeRuntimeTypes, u32> =
+            Decode::decode(&mut srml_encoded.as_slice())
+                .expect("Account Index decodes back to ink type");
 
-        assert_eq!(ink_address, ink_decoded);
+        assert!(ink_address == ink_decoded);
     }
 
     #[test]
@@ -158,13 +161,15 @@ mod tests {
 
         assert_eq!(srml_encoded, ink_encoded);
 
-        let srml_decoded: address::Address<[u8; 32], u32> = Decode::decode(&mut ink_encoded.as_slice())
-            .expect("Account Id decodes to srml Address");
+        let srml_decoded: address::Address<[u8; 32], u32> =
+            Decode::decode(&mut ink_encoded.as_slice())
+                .expect("Account Id decodes to srml Address");
         let srml_encoded = srml_decoded.encode();
-        let ink_decoded: Address<NodeRuntimeTypes, u32> = Decode::decode(&mut srml_encoded.as_slice())
-            .expect("Account Id decodes decodes back to ink type");
+        let ink_decoded: Address<NodeRuntimeTypes, u32> =
+            Decode::decode(&mut srml_encoded.as_slice())
+                .expect("Account Id decodes decodes back to ink type");
 
-        assert_eq!(ink_address, ink_decoded);
+        assert!(ink_address == ink_decoded);
     }
 
     #[test]
@@ -173,7 +178,8 @@ mod tests {
         let account_index = 0;
 
         let contract_address = calls::Address::Index(account_index);
-        let contract_transfer = calls::Balances::<NodeRuntimeTypes, AccountIndex>::transfer(contract_address, balance);
+        let contract_transfer =
+            calls::Balances::<NodeRuntimeTypes, AccountIndex>::transfer(contract_address, balance);
         let contract_call = Call::Balances(contract_transfer);
 
         let srml_address = address::Address::Index(account_index);
@@ -185,12 +191,12 @@ mod tests {
 
         assert_eq!(srml_call_encoded, contract_call_encoded);
 
-        let srml_call_decoded: node_runtime::Call = Decode::decode(&mut contract_call_encoded.as_slice())
-            .expect("Balances transfer call decodes to srml type");
+        let srml_call_decoded: node_runtime::Call =
+            Decode::decode(&mut contract_call_encoded.as_slice())
+                .expect("Balances transfer call decodes to srml type");
         let srml_call_encoded = srml_call_decoded.encode();
         let contract_call_decoded: Call = Decode::decode(&mut srml_call_encoded.as_slice())
             .expect("Balances transfer call decodes back to contract type");
-        assert_eq!(contract_call, contract_call_decoded);
+        assert!(contract_call == contract_call_decoded);
     }
 }
-
