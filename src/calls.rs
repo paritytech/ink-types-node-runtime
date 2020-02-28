@@ -38,7 +38,6 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::{calls, AccountIndex, Call, NodeRuntimeTypes};
 
     use node_runtime::{self, Runtime};
