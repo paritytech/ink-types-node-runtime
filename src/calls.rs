@@ -18,7 +18,24 @@ use ink_core::env::EnvTypes;
 use scale::{Codec, Decode, Encode};
 use pallet_indices::address::Address;
 use sp_runtime::traits::Member;
+use crate::{AccountId, AccountIndex, Balance, NodeRuntimeTypes};
 
+/// Default runtime Call type, a subset of the runtime Call module variants
+///
+/// The codec indices of the  modules *MUST* match those in the concrete runtime.
+#[derive(Encode, Decode)]
+#[cfg_attr(feature = "std", derive(Clone, PartialEq, Eq))]
+pub enum Call {
+    #[codec(index = "6")]
+    Balances(Balances<NodeRuntimeTypes, AccountIndex>),
+}
+
+impl From<Balances<NodeRuntimeTypes, AccountIndex>> for Call {
+    fn from(balances_call: Balances<NodeRuntimeTypes, AccountIndex>) -> Call {
+        Call::Balances(balances_call)
+    }
+}
+/// Generic Balance Call, could be used with other runtimes
 #[derive(Encode, Decode, Clone, PartialEq, Eq)]
 pub enum Balances<T, AccountIndex>
 where
@@ -36,9 +53,15 @@ where
     ),
 }
 
+/// Construct a `Balances::transfer` call
+pub fn transfer_balance(account: AccountId, balance: Balance) -> Call {
+    Balances::<NodeRuntimeTypes, AccountIndex>::transfer(account.into(), balance).into()
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{calls, AccountIndex, Call, NodeRuntimeTypes};
+    use crate::{calls, AccountIndex, NodeRuntimeTypes};
+    use super::Call;
 
     use node_runtime::{self, Runtime};
     use pallet_indices::address;

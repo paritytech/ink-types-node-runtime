@@ -15,6 +15,9 @@ type-metadata = { git = "https://github.com/type-metadata/type-metadata.git", de
 
 ink_types_node_runtime = { path = "../../", default-features = false }
 
+[dev-dependencies]
+sp-keyring = { git = "https://github.com/paritytech/substrate/", package = "sp-keyring", default-features = false }
+
 [lib]
 name = "calls"
 path = "lib.rs"
@@ -33,6 +36,7 @@ std = [
     "ink_primitives/std",
     "scale/std",
     "type-metadata/std",
+    "ink_types_node_runtime/std",
 ]
 test-env = [
     "std",
