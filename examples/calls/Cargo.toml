@@ -12,11 +12,9 @@ ink_lang = { git = "https://github.com/paritytech/ink", package = "ink_lang", de
 
 scale = { package = "parity-scale-codec", version = "1.1", default-features = false, features = ["derive"] }
 type-metadata = { git = "https://github.com/type-metadata/type-metadata.git", default-features = false, features = ["derive"], optional = true }
+sp-keyring = { git = "https://github.com/paritytech/substrate/", package = "sp-keyring", optional = true }
 
 ink_types_node_runtime = { path = "../../", default-features = false }
-
-[dev-dependencies]
-sp-keyring = { git = "https://github.com/paritytech/substrate/", package = "sp-keyring", default-features = false }
 
 [lib]
 name = "calls"
@@ -37,6 +35,7 @@ std = [
     "scale/std",
     "type-metadata/std",
     "ink_types_node_runtime/std",
+    "sp-keyring",
 ]
 test-env = [
     "std",
