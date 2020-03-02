@@ -22,14 +22,38 @@
 use core::{array::TryFromSliceError, convert::TryFrom};
 use ink_core::env::Clear;
 use scale::{Decode, Encode};
-use sp_core::crypto::AccountId32 as AccountId;
+use sp_core::crypto::AccountId32;
+use type_metadata::{HasTypeId, HasTypeDef, Metadata, MetaType, TypeId, TypeDef, TypeIdArray};
 
 pub mod calls;
 
 /// Contract environment types defined in substrate node-runtime
-#[cfg_attr(feature = "ink-generate-abi", derive(type_metadata::Metadata))]
+#[cfg_attr(feature = "ink-generate-abi", derive(Metadata))]
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum NodeRuntimeTypes {}
+
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Encode, Decode)]
+pub struct AccountId (AccountId32);
+
+impl From<AccountId32> for AccountId {
+    fn from(account: AccountId32) -> Self {
+        AccountId(account)
+    }
+}
+
+#[cfg(feature = "ink-generate-abi")]
+impl HasTypeId for AccountId {
+    fn type_id() -> TypeId {
+        TypeIdArray::new(32, MetaType::new::<u8>()).into()
+    }
+}
+
+#[cfg(feature = "ink-generate-abi")]
+impl HasTypeDef for AccountId {
+    fn type_def() -> TypeDef {
+        TypeDef::builtin()
+    }
+}
 
 /// The default SRML balance type.
 pub type Balance = u128;
